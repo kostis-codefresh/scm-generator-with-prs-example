@@ -44,7 +44,7 @@ spec:
     spec:
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{ .values.appName }}'
+        namespace: '{{ .values.appName }}--pr-{{ .number }}'
       project: 'default'
       source:
         path: preview-environments/kustomize-preview-app
