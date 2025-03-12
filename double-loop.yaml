@@ -43,7 +43,7 @@ spec:
       name: '{{ .values.appName }}--pr-{{ .number }}'
     spec:
       destination:
-        name: apps
+        server: https://kubernetes.default.svc
         namespace: '{{ .values.appName }}'
       project: 'default'
       source:
@@ -60,3 +60,4 @@ spec:
         - Validate=true
         - ApplyOutOfSyncOnly=false
         - PreserveResourcesOnDeletion=false
+        - CreateNamespace=true  
