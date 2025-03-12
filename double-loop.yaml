@@ -16,7 +16,7 @@ spec:
           - labelMatch: codefresh-stage-previews
           github:
             allBranches: false
-            organization: codefresh-contrib
+            organization: containers101
           values:
             appName: '{{- $appName := .repository }}{{- $topics := splitList "," .labels
               }}{{- range $topic := $topics }}{{- $parts := splitList "--" $topic
@@ -26,7 +26,7 @@ spec:
           github:
             labels:
             - preview
-            owner: kostis-codefresh
+            owner: containers101
             repo: '{{ .repository }}'
           # requeueAfterSeconds: 20
   goTemplate: true
