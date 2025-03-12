@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  labels:
+    app.kubernetes.io/instance: apps-isc
+  name: all-repos-preview
+  # namespace: codefresh
+  namespace: argocd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - scmProvider:
+          cloneProtocol: https
+          filters:
+          - labelMatch: codefresh-stage-previews
+          github:
+            allBranches: false
+            organization: codefresh-contrib
+          values:
+            appName: '{{- $appName := .repository }}{{- $topics := splitList "," .labels
+              }}{{- range $topic := $topics }}{{- $parts := splitList "--" $topic
+              }}{{- if and (eq (len $parts) 2) (eq (first $parts) "codefresh-stage-previews-name")
+              }}{{- $appName = last $parts }}{{- end }}{{- end }}{{- $appName }}'
+      - pullRequest:
+          github:
+            labels:
+            - preview
+            owner: kostis-codefresh
+            repo: '{{ .repository }}'
+          # requeueAfterSeconds: 20
+  goTemplate: true
+  template:
+    metadata:
+      annotations:
+        # argocd.argoproj.io/manifest-generate-paths: apps/{{ .values.appName }}/stage/preview
+        github_repo: '{{ .repository }}'
+        pr_head_sha: '{{ .head_sha }}'
+        pr_number: '{{ .number }}'
+      labels:
+        app: '{{ .values.appName }}'
+        environment: stage
+      name: '{{ .values.appName }}--pr-{{ .number }}'
+    spec:
+      destination:
+        name: apps
+        namespace: '{{ .values.appName }}'
+      project: 'default'
+      source:
+        path: preview-environments/kustomize-preview-app
+        repoURL: https://github.com/codefresh-contrib/gitops-cert-level-3-examples
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - PrunePropagationPolicy=foreground
+        - Replace=false
+        - PruneLast=false
+        - Validate=true
+        - ApplyOutOfSyncOnly=false
+        - PreserveResourcesOnDeletion=false
